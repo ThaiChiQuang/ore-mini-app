@@ -1,25 +1,209 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>ORE Mining</title>
+  <title>ORE Mining Mini App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Telegram SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background: #0b0f14;
+      color: #fff;
+    }
+
+    .container {
+      padding: 16px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .balance {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 16px;
+    }
+
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      cursor: pointer;
+      background: #141a22;
+      border-radius: 8px;
+      margin-right: 6px;
+      font-size: 14px;
+    }
+
+    .tab.active {
+      background: #1f6feb;
+    }
+
+    .section {
+      display: none;
+      background: #141a22;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    label {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0 16px;
+      border-radius: 8px;
+      border: none;
+      background: #0b0f14;
+      color: #fff;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #1f6feb;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .row button {
+      flex: 1;
+    }
+
+    .status {
+      margin-top: 12px;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .toggle input {
+      margin-right: 8px;
+    }
+  </style>
 </head>
 
 <body>
-  <h2>⛏ ORE Mining</h2>
+  <div class="container">
 
-  <button onclick="buyMining()">Buy Mining Power (⭐ Stars)</button>
+    <!-- HEADER -->
+    <div class="header">
+      <div><b>⛏ ORE Mining</b></div>
+      <div class="balance">
+        ORE: 0.00<br />
+        SOL: 0.00
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('mining')">⛏ Mining</div>
+      <div class="tab" onclick="switchTab('wallet')">💼 Wallet</div>
+      <div class="tab" onclick="switchTab('stake')">🪙 Stake</div>
+    </div>
+
+    <!-- MINING -->
+    <div id="mining" class="section active">
+      <label>Blocks to mine</label>
+      <input type="number" placeholder="e.g. 1000" />
+
+      <label>Stars to deploy</label>
+      <input type="number" placeholder="e.g. 50 ⭐" />
+
+      <div class="toggle">
+        <input type="checkbox" />
+        <label>Auto Mine</label>
+      </div>
+
+      <button onclick="startMining()">Start Mining</button>
+
+      <div class="status" id="miningStatus">
+        Idle
+      </div>
+    </div>
+
+    <!-- WALLET -->
+    <div id="wallet" class="section">
+      <label>SOL Balance</label>
+      <input disabled value="0.00 SOL" />
+
+      <div class="row">
+        <button>Deposit SOL</button>
+        <button>Withdraw SOL</button>
+      </div>
+
+      <label style="margin-top:16px;">ORE Balance</label>
+      <input disabled value="0.00 ORE" />
+
+      <div class="row">
+        <button>Claim ORE</button>
+        <button>Withdraw ORE</button>
+      </div>
+    </div>
+
+    <!-- STAKE -->
+    <div id="stake" class="section">
+      <label>Stake ORE</label>
+      <input placeholder="Amount of ORE" />
+
+      <button>Stake</button>
+
+      <label style="margin-top:16px;">Staked ORE</label>
+      <input disabled value="0.00 ORE" />
+
+      <button>Unstake</button>
+    </div>
+
+  </div>
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
 
-    function buyMining() {
-      tg.sendData(JSON.stringify({
-        action: "buy_mining",
-        package: "basic"
-      }));
+    function switchTab(id) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+      document.querySelector(`[onclick="switchTab('${id}')"]`).classList.add('active');
+      document.getElementById(id).classList.add('active');
+    }
+
+    function startMining() {
+      document.getElementById('miningStatus').innerText = '⛏ Mining in progress...';
     }
   </script>
 </body>
