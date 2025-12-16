@@ -3,37 +3,79 @@
 <head>
 <meta charset="UTF-8" />
 <title>ORE Mining</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <style>
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   background: radial-gradient(circle at top, #121826, #070b12);
   color: #fff;
-  font-family: Inter, system-ui, sans-serif;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .app {
-  display: flex;
   padding: 12px;
-  gap: 12px;
+  max-width: 480px;
+  margin: 0 auto;
 }
 
+/* ===== STATS ===== */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.stat {
+  background: #0f1420;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+}
+
+.stat small {
+  opacity: .6;
+  font-size: 11px;
+}
+
+.stat b {
+  font-size: 16px;
+  display: block;
+  margin-top: 4px;
+}
+
+/* ===== BLOCK GRID ===== */
 .blocks {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  flex: 1;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 
 .block {
   background: #0f1420;
-  border-radius: 10px;
-  padding: 10px;
-  text-align: center;
   border: 1px solid #1f2937;
+  border-radius: 10px;
+  padding: 8px 4px;
+  text-align: center;
   cursor: pointer;
+  user-select: none;
+}
+
+.block small {
+  opacity: .6;
+  font-size: 10px;
+}
+
+.block b {
+  font-size: 12px;
 }
 
 .block.active {
@@ -41,34 +83,19 @@ body {
   box-shadow: 0 0 0 1px #facc15;
 }
 
-.block small {
-  opacity: .6;
-  font-size: 11px;
-}
-
+/* ===== PANEL ===== */
 .panel {
-  width: 260px;
   background: #0f1420;
-  border-radius: 14px;
-  padding: 14px;
   border: 1px solid #1f2937;
-}
-
-.stat {
-  background: #070b12;
-  border-radius: 10px;
-  padding: 10px;
-  margin-bottom: 10px;
-  text-align: center;
-}
-
-.stat b {
-  font-size: 18px;
+  border-radius: 14px;
+  padding: 12px;
 }
 
 .toggle {
   display: flex;
   margin-bottom: 10px;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .toggle button {
@@ -76,8 +103,8 @@ body {
   background: #070b12;
   border: none;
   color: #aaa;
-  padding: 8px;
-  cursor: pointer;
+  padding: 10px;
+  font-size: 13px;
 }
 
 .toggle button.active {
@@ -87,22 +114,42 @@ body {
 
 input {
   width: 100%;
-  padding: 10px;
-  border-radius: 8px;
+  padding: 12px;
+  border-radius: 10px;
   border: none;
   background: #070b12;
   color: #fff;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  font-size: 14px;
 }
 
 .deploy {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
+  margin-top: 8px;
   background: linear-gradient(90deg,#facc15,#f59e0b);
   color: #000;
   font-weight: bold;
   border: none;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+/* ===== FOOTER ACTIONS ===== */
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.actions button {
+  background: #070b12;
+  border: 1px solid #1f2937;
   border-radius: 10px;
+  color: #fff;
+  padding: 10px;
+  font-size: 13px;
 }
 </style>
 </head>
@@ -110,58 +157,112 @@ input {
 <body>
 <div class="app">
 
-  <!-- BLOCK GRID -->
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat">
+      <small>Motherlode</small>
+      <b id="motherlode">--</b>
+    </div>
+    <div class="stat">
+      <small>Time</small>
+      <b id="time">--</b>
+    </div>
+    <div class="stat">
+      <small>Deployed</small>
+      <b><span id="totalSol">--</span> SOL</b>
+    </div>
+  </div>
+
+  <!-- BLOCKS -->
   <div class="blocks" id="blocks"></div>
 
-  <!-- DEPLOY PANEL -->
+  <!-- PANEL -->
   <div class="panel">
-    <div class="stat">
-      <small>Motherlode</small><br>
-      <b>222.2</b>
-    </div>
-
-    <div class="stat">
-      <small>Time remaining</small><br>
-      <b id="timer">00:45</b>
-    </div>
-
-    <div class="stat">
-      <small>Total deployed</small><br>
-      <b>4.6628 SOL</b>
-    </div>
-
     <div class="toggle">
       <button class="active">Manual</button>
       <button>Auto</button>
     </div>
 
-    <input type="number" placeholder="SOL amount" value="1.0">
+    <input type="number" value="1.0" placeholder="SOL to deploy" />
 
-    <small>Blocks selected: <span id="count">0</span></small><br><br>
+    <small>Blocks selected: <span id="count">0</span></small>
 
-    <button class="deploy">Deploy</button>
+    <button class="deploy">⛏ Deploy & Mine</button>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button>Claim ORE</button>
+    <button>Claim SOL</button>
+    <button>Deposit</button>
+    <button>Withdraw</button>
+    <button>Stake ORE</button>
+    <button>Unstake</button>
   </div>
 
 </div>
 
 <script>
+/* ===== TELEGRAM READY ===== */
 const tg = window.Telegram.WebApp;
 tg.ready();
 
-const blocksEl = document.getElementById('blocks');
-let selected = new Set();
+/* ===== CONFIG ===== */
+const API_BASE = "https://unedificial-collaborative-arlen.ngrok-free.dev/api";
 
-for (let i = 1; i <= 25; i++) {
-  const b = document.createElement('div');
-  b.className = 'block';
-  b.innerHTML = `<small>#${i}</small><br><b>${(Math.random()*0.25).toFixed(4)}</b>`;
-  b.onclick = () => {
-    b.classList.toggle('active');
-    b.classList.contains('active') ? selected.add(i) : selected.delete(i);
-    document.getElementById('count').innerText = selected.size;
-  };
-  blocksEl.appendChild(b);
+/* ===== STATE ===== */
+let selectedBlocks = new Set();
+
+/* ===== LOAD STATS ===== */
+async function loadMiningState() {
+  try {
+    const res = await fetch(API_BASE + "/mining/state");
+    const data = await res.json();
+
+    document.getElementById("motherlode").innerText = data.motherlode;
+    document.getElementById("time").innerText = "00:" + data.time_remaining;
+    document.getElementById("totalSol").innerText = data.total_deployed_sol;
+  } catch (e) {
+    console.log("API not connected yet");
+  }
 }
+
+/* ===== LOAD BLOCKS ===== */
+async function loadBlocks() {
+  try {
+    const res = await fetch(API_BASE + "/mining/blocks");
+    const blocks = await res.json();
+
+    const container = document.getElementById("blocks");
+    container.innerHTML = "";
+
+    blocks.forEach(b => {
+      const div = document.createElement("div");
+      div.className = "block";
+      div.innerHTML = `<small>#${b.id}</small><br><b>${b.difficulty}</b>`;
+
+      div.onclick = () => {
+        div.classList.toggle("active");
+        div.classList.contains("active")
+          ? selectedBlocks.add(b.id)
+          : selectedBlocks.delete(b.id);
+        document.getElementById("count").innerText = selectedBlocks.size;
+      };
+
+      container.appendChild(div);
+    });
+  } catch (e) {
+    console.log("Blocks API not connected yet");
+  }
+}
+
+/* ===== INIT ===== */
+window.onload = () => {
+  loadMiningState();
+  loadBlocks();
+  setInterval(loadMiningState, 5000);
+};
 </script>
+
 </body>
 </html>
