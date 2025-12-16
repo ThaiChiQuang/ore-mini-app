@@ -1,210 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>ORE Mining Mini App</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8" />
+<title>ORE Mining</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- Telegram SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #121826, #070b12);
+  color: #fff;
+  font-family: Inter, system-ui, sans-serif;
+}
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Inter, Arial, sans-serif;
-      background: #0b0f14;
-      color: #fff;
-    }
+.app {
+  display: flex;
+  padding: 12px;
+  gap: 12px;
+}
 
-    .container {
-      padding: 16px;
-    }
+.blocks {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  flex: 1;
+}
 
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
+.block {
+  background: #0f1420;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  border: 1px solid #1f2937;
+  cursor: pointer;
+}
 
-    .balance {
-      font-size: 12px;
-      opacity: 0.8;
-    }
+.block.active {
+  border-color: #facc15;
+  box-shadow: 0 0 0 1px #facc15;
+}
 
-    .tabs {
-      display: flex;
-      margin-bottom: 16px;
-    }
+.block small {
+  opacity: .6;
+  font-size: 11px;
+}
 
-    .tab {
-      flex: 1;
-      text-align: center;
-      padding: 10px;
-      cursor: pointer;
-      background: #141a22;
-      border-radius: 8px;
-      margin-right: 6px;
-      font-size: 14px;
-    }
+.panel {
+  width: 260px;
+  background: #0f1420;
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid #1f2937;
+}
 
-    .tab.active {
-      background: #1f6feb;
-    }
+.stat {
+  background: #070b12;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+}
 
-    .section {
-      display: none;
-      background: #141a22;
-      border-radius: 12px;
-      padding: 16px;
-    }
+.stat b {
+  font-size: 18px;
+}
 
-    .section.active {
-      display: block;
-    }
+.toggle {
+  display: flex;
+  margin-bottom: 10px;
+}
 
-    label {
-      font-size: 12px;
-      opacity: 0.8;
-    }
+.toggle button {
+  flex: 1;
+  background: #070b12;
+  border: none;
+  color: #aaa;
+  padding: 8px;
+  cursor: pointer;
+}
 
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 8px 0 16px;
-      border-radius: 8px;
-      border: none;
-      background: #0b0f14;
-      color: #fff;
-    }
+.toggle button.active {
+  background: #1f6feb;
+  color: #fff;
+}
 
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #1f6feb;
-      border: none;
-      border-radius: 10px;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 8px;
-    }
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background: #070b12;
+  color: #fff;
+  margin-bottom: 10px;
+}
 
-    .row {
-      display: flex;
-      gap: 8px;
-    }
-
-    .row button {
-      flex: 1;
-    }
-
-    .status {
-      margin-top: 12px;
-      font-size: 13px;
-      opacity: 0.9;
-    }
-
-    .toggle {
-      display: flex;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-
-    .toggle input {
-      margin-right: 8px;
-    }
-  </style>
+.deploy {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(90deg,#facc15,#f59e0b);
+  color: #000;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+}
+</style>
 </head>
 
 <body>
-  <div class="container">
+<div class="app">
 
-    <!-- HEADER -->
-    <div class="header">
-      <div><b>⛏ ORE Mining</b></div>
-      <div class="balance">
-        ORE: 0.00<br />
-        SOL: 0.00
-      </div>
+  <!-- BLOCK GRID -->
+  <div class="blocks" id="blocks"></div>
+
+  <!-- DEPLOY PANEL -->
+  <div class="panel">
+    <div class="stat">
+      <small>Motherlode</small><br>
+      <b>222.2</b>
     </div>
 
-    <!-- TABS -->
-    <div class="tabs">
-      <div class="tab active" onclick="switchTab('mining')">⛏ Mining</div>
-      <div class="tab" onclick="switchTab('wallet')">💼 Wallet</div>
-      <div class="tab" onclick="switchTab('stake')">🪙 Stake</div>
+    <div class="stat">
+      <small>Time remaining</small><br>
+      <b id="timer">00:45</b>
     </div>
 
-    <!-- MINING -->
-    <div id="mining" class="section active">
-      <label>Blocks to mine</label>
-      <input type="number" placeholder="e.g. 1000" />
-
-      <label>Stars to deploy</label>
-      <input type="number" placeholder="e.g. 50 ⭐" />
-
-      <div class="toggle">
-        <input type="checkbox" />
-        <label>Auto Mine</label>
-      </div>
-
-      <button onclick="startMining()">Start Mining</button>
-
-      <div class="status" id="miningStatus">
-        Idle
-      </div>
+    <div class="stat">
+      <small>Total deployed</small><br>
+      <b>4.6628 SOL</b>
     </div>
 
-    <!-- WALLET -->
-    <div id="wallet" class="section">
-      <label>SOL Balance</label>
-      <input disabled value="0.00 SOL" />
-
-      <div class="row">
-        <button>Deposit SOL</button>
-        <button>Withdraw SOL</button>
-      </div>
-
-      <label style="margin-top:16px;">ORE Balance</label>
-      <input disabled value="0.00 ORE" />
-
-      <div class="row">
-        <button>Claim ORE</button>
-        <button>Withdraw ORE</button>
-      </div>
+    <div class="toggle">
+      <button class="active">Manual</button>
+      <button>Auto</button>
     </div>
 
-    <!-- STAKE -->
-    <div id="stake" class="section">
-      <label>Stake ORE</label>
-      <input placeholder="Amount of ORE" />
+    <input type="number" placeholder="SOL amount" value="1.0">
 
-      <button>Stake</button>
+    <small>Blocks selected: <span id="count">0</span></small><br><br>
 
-      <label style="margin-top:16px;">Staked ORE</label>
-      <input disabled value="0.00 ORE" />
-
-      <button>Unstake</button>
-    </div>
-
+    <button class="deploy">Deploy</button>
   </div>
 
-  <script>
-    const tg = window.Telegram.WebApp;
-    tg.ready();
+</div>
 
-    function switchTab(id) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+<script>
+const tg = window.Telegram.WebApp;
+tg.ready();
 
-      document.querySelector(`[onclick="switchTab('${id}')"]`).classList.add('active');
-      document.getElementById(id).classList.add('active');
-    }
+const blocksEl = document.getElementById('blocks');
+let selected = new Set();
 
-    function startMining() {
-      document.getElementById('miningStatus').innerText = '⛏ Mining in progress...';
-    }
-  </script>
+for (let i = 1; i <= 25; i++) {
+  const b = document.createElement('div');
+  b.className = 'block';
+  b.innerHTML = `<small>#${i}</small><br><b>${(Math.random()*0.25).toFixed(4)}</b>`;
+  b.onclick = () => {
+    b.classList.toggle('active');
+    b.classList.contains('active') ? selected.add(i) : selected.delete(i);
+    document.getElementById('count').innerText = selected.size;
+  };
+  blocksEl.appendChild(b);
+}
+</script>
 </body>
 </html>
