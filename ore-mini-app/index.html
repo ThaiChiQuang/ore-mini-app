@@ -3,27 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <title>ORE Mining Mini App</title>
+
+  <!-- Telegram Mini App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #0f172a;
       color: white;
       padding: 20px;
+      text-align: center;
     }
+
     button {
       width: 100%;
       padding: 15px;
-      margin-top: 10px;
+      margin-top: 15px;
       font-size: 16px;
-      border-radius: 10px;
+      border-radius: 12px;
       border: none;
       cursor: pointer;
     }
-    .primary {
+
+    .mine {
       background: #22c55e;
     }
-    .secondary {
+
+    .buy {
       background: #3b82f6;
     }
   </style>
@@ -31,14 +38,14 @@
 <body>
 
   <h2>⛏️ ORE Mining</h2>
-  <p>Mine ORE directly inside Telegram.</p>
+  <p>Mine ORE directly inside Telegram</p>
 
-  <button class="primary" onclick="startMining()">
+  <button class="mine" onclick="startMining()">
     Start Mining
   </button>
 
-  <button class="secondary" onclick="buyMiningPower()">
-    Buy Mining Power (Stars)
+  <button class="buy" onclick="buyMiningPower()">
+    Buy Mining Power (Telegram Stars)
   </button>
 
   <script>
@@ -46,11 +53,13 @@
     tg.ready();
 
     function startMining() {
-      alert("Mining will start after payment (next step).");
+      tg.showAlert("Mining will start after payment.");
     }
 
     function buyMiningPower() {
-      alert("Telegram Stars payment will be here.");
+      tg.sendData(JSON.stringify({
+        action: "buy_mining_power"
+      }));
     }
   </script>
 
