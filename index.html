@@ -2,54 +2,23 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>ORE Mining Mini App</title>
+  <title>ORE Mining</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0b0b0b;
-      color: white;
-      text-align: center;
-      padding-top: 40px;
-    }
-    button {
-      width: 80%;
-      padding: 16px;
-      margin: 12px;
-      font-size: 18px;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-    }
-    .start {
-      background: #16c784;
-    }
-    .buy {
-      background: #f5a623;
-    }
-  </style>
 </head>
 
 <body>
   <h2>⛏ ORE Mining</h2>
 
-  <button class="start" onclick="startMining()">Start Mining</button>
-  <button class="buy" onclick="buyPower()">Buy Mining Power ⭐</button>
+  <button onclick="buyMining()">Buy Mining Power (⭐ Stars)</button>
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
 
-    function startMining() {
+    function buyMining() {
       tg.sendData(JSON.stringify({
-        action: "start_mining"
-      }));
-    }
-
-    function buyPower() {
-      tg.sendData(JSON.stringify({
-        action: "buy_power",
-        amount: 1
+        action: "buy_mining",
+        package: "basic"
       }));
     }
   </script>
